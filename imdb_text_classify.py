@@ -61,4 +61,42 @@ def decode_review(text):
 # 使用decode_review查看第一个样本的字词
 print(decode_review(train_data[0]))
 
+"""
+    预处理数据
+    将影评（整数数组）转换为张量，将张量馈入网络。整数数组转换为张量有两种方法：
+        1.one-hot编码，使每一个样本的字词编码成1和0的向量，构成一个num_words（10000）*num_reviews（10000）的张量
+        2.padding数据，使每一个样本（整数数组）的长度一致，构成一个max_length（256）*num_reviews（10000）的张量1
+"""
 
+train_data = keras.preprocessing.sequence.pad_sequences(
+                                    train_data,
+                                    padding='post',
+                                    maxlen=256,
+                                    value=word_index['PAD']
+                                )
+
+test_data = keras.preprocessing.sequence.pad_sequences(
+                                    test_data,
+                                    padding='post',
+                                    maxlen=256,
+                                    value=word_index['PAD']
+                                )
+
+# 查看填充数据后数据的长度
+print(len(train_data[0]), len(train_data[1]))
+
+# 查看第一条影评（整数数组）
+print(train_data[0])
+
+"""
+    构建模型：
+    配置模型+编译模型
+"""
+
+"""
+    配置模型
+    神经网络的基本构造块是层。层从馈送到其中的数据中提取表示结果，
+    并且希望这些表示结果有助于解决手头问题。
+    大部分深度学习都会把简单的层连在一起。
+    大部分层（例如 tf.keras.layers.Dense）都具有在训练期间要学习的参数。
+"""
