@@ -99,4 +99,34 @@ print(train_data[0])
     并且希望这些表示结果有助于解决手头问题。
     大部分深度学习都会把简单的层连在一起。
     大部分层（例如 tf.keras.layers.Dense）都具有在训练期间要学习的参数。
+    
+    神经网络通过堆叠层创建而成，这需要做出两个架构方面的主要决策：     
+        1.要在模型中使用多少个层？
+        2.要针对每个层使用多少个隐藏单元？
+        
+    第一个层是映射层，将10000维映射到16维，减少维度
+    第二个层是全局池化层，减少参数量（？）
+    第三个层是密集连接（全连接层），relu激活函数，将<0的置为0，>0的保持不变。
+    第四个层是密集连接（全连接层），sigmoid激活函数，将数值映射到(0,1)之间，作为输出的预测概率。
 """
+vocab_size = 10000
+
+# 第一种配置模型的方法
+# model = keras.Sequential([
+#     keras.layers.Embedding(vocab_size, 16),
+#     keras.layers.GlobalAveragePooling1D(),
+#     keras.layers.Dense(16, activation=tf.nn.relu),
+#     keras.layers.Dense(1, activation=tf.nn.sigmoid)
+# ])
+#
+# model.summary()
+
+# 第二种配置模型的方法
+model = keras.Sequential()
+model.add(keras.layers.Embedding(vocab_size, 16))
+model.add(keras.layers.GlobalAveragePooling1D)
+model.add(keras.layers.Dense(16, activation=tf.nn.relu))
+model.add(keras.layers.Dense(1, activation=tf.nn.sigmoid))
+
+model.summary()
+
