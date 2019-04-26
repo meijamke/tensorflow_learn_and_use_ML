@@ -2,8 +2,13 @@
 ## fashion_mnist.py:
 ### basic classification:
 - network structure: 
-   - flatten + dense(relu) + dense(softmax)
+   - Flatten + Dense(relu) + Dense(softmax)
 - dataset: 
    - fashion_mnist
 
 ## imdb_text_classification.py:
+### text classification:
+- network structure: 
+   - Embedding + GlobalAveragePooling + Dense(relu) + Dense(sigmoid)
+- dataset:
+   - imdb
