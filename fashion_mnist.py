@@ -149,7 +149,12 @@ model.compile(
         
     要开始训练，请调用 model.fit 方法，使模型与训练数据“拟合”：
 """
-model.fit(train_images, train_labels, epochs=4)
+model.fit(
+    train_images,
+    train_labels,
+    epochs=4
+)
+
 
 """
     评估准确率

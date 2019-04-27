@@ -3,7 +3,7 @@
     作者：meijamke
     功能：将文本形式的影评分为“正面”或“负面”——二元分类
 
-    隐藏单元（神经单元）：
+    知识点：隐藏单元（神经单元）、过拟合
 
 
     问题：由于tensorflow版本过低，tf.keras.dataset里并没有Fashion MNIST 数据集文件夹
@@ -19,6 +19,7 @@ from keras.datasets import imdb
 
 # lib helper
 import numpy as np
+from matplotlib import pyplot as plt
 
 # 显示tf版本
 # print(tf.__version__)
@@ -74,14 +75,14 @@ train_data = keras.preprocessing.sequence.pad_sequences(
                                     train_data,
                                     padding='post',
                                     maxlen=256,
-                                    value=word_index['PAD']
+                                    value=word_index['<PAD>']
                                 )
 
 test_data = keras.preprocessing.sequence.pad_sequences(
                                     test_data,
                                     padding='post',
                                     maxlen=256,
-                                    value=word_index['PAD']
+                                    value=word_index['<PAD>']
                                 )
 
 # 查看填充数据后数据的长度
@@ -128,7 +129,7 @@ vocab_size = 10000
 # 第二种配置模型的方法
 model = keras.Sequential()
 model.add(keras.layers.Embedding(vocab_size, 16))
-model.add(keras.layers.GlobalAveragePooling1D)
+model.add(keras.layers.GlobalAveragePooling1D())
 model.add(keras.layers.Dense(16, activation=tf.nn.relu))
 model.add(keras.layers.Dense(1, activation=tf.nn.sigmoid))
 
@@ -156,5 +157,78 @@ model.compile(
     metrics=['accuracy']
 )
 
+"""
+    创建验证集
+    在训练时，我们需要检查模型处理从未见过的数据的准确率。我们从原始训练数据中分离出 10000 个样本，创建一个验证集。
+    （为什么现在不使用测试集？我们的目标是仅使用训练数据开发和调整模型，然后仅使用一次测试数据评估准确率。）
+"""
+x_val = train_data[:10000]
+partial_x_train = train_data[10000:]
+
+y_val = train_labels[:10000]
+partial_y_train = train_labels[10000:]
 
 
+"""
+    训练模型
+    保存训练的所有历史信息——包括loss和accuracy等
+    用有 512 个样本的小批次训练模型 40 个周期。这将对 x_train 和 y_train 张量中的所有样本进行 40 次迭代。
+    在训练期间，监控模型在验证集的 10000 个样本上的损失和准确率：
+"""
+history = model.fit(
+    partial_x_train,
+    partial_y_train,
+    epochs=40,
+    batch_size=512,
+    validation_data=(x_val, y_val),
+    verbose=1
+)
+
+"""评估模型
+"""
+result = model.evaluate(test_data, test_labels)
+print(result)
+
+"""绘制训练和验证的损失率和准确率随时间变化的图
+"""
+histort_dict = history.history
+histort_dict.keys()
+
+train_loss = histort_dict['loss']
+train_acc = histort_dict['acc']
+
+val_loss = histort_dict['val_loss']
+val_acc = histort_dict['val_acc']
+
+epochs = range(1, len(train_loss)+1)
+
+# bo is blue dot, b is blue line
+plt.plot(epochs, train_loss, 'bo', label='train_loss')
+plt.plot(epochs, val_loss, 'b', label='train_loss')
+plt.title('train and validation loss')
+plt.xlabel('epochs')
+plt.ylabel('loss')
+plt.legend()
+plt.show()
+
+plt.clf()
+# bo is blue dot, b is blue line
+plt.plot(epochs, train_acc, 'bo', label='train_acc')
+plt.plot(epochs, val_acc, 'b', label='train_acc')
+plt.title('train and validation accuracy')
+plt.xlabel('epochs')
+plt.ylabel('accuracy')
+plt.legend()
+plt.show()
+
+"""
+    可以注意到，训练损失随着周期数的增加而降低，训练准确率随着周期数的增加而提高。
+    在使用梯度下降法优化模型时，这属于正常现象 - 该方法应在每次迭代时尽可能降低目标值。
+    
+    验证损失和准确率的变化情况并非如此，它们似乎在大约 20 个周期后达到峰值。
+    这是一种过拟合现象：模型在训练数据上的表现要优于在从未见过的数据上的表现。
+    在此之后，模型会过度优化和学习特定于训练数据的表示法，而无法泛化到测试数据。
+    
+    对于这种特殊情况，我们可以在大约 20 个周期后停止训练，防止出现过拟合。
+    稍后，您将了解如何使用回调自动执行此操作。
+"""
