@@ -12,3 +12,10 @@
    - Embedding + GlobalAveragePooling + Dense(relu) + Dense(sigmoid)
 - dataset:
    - imdb
+
+## regression_pred_fuel_efficiency.py
+### regression
+- network structure:
+   
+- dataset:
+    - Auto MPG
