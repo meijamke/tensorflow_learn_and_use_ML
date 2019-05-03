@@ -59,3 +59,15 @@ print(dataset.tail())
 """
 train_dataset = dataset.sample(frac=0.8, random_state=0)
 test_dataset = dataset.drop(train_dataset.index)
+
+"""
+    预览数据
+    1.训练集中几对列的联合分布。
+    2.查看整体统计数据
+"""
+sns.pairplot(train_dataset[["MPG", "Cylinders", "Displacement", "Weight"]], diag_kind='kde')
+
+train_status = train_dataset.describe()
+train_status.pop('MPG')
+train_status = train_status.transpose()
+print(train_status)
